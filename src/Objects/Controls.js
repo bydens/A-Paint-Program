@@ -21,7 +21,7 @@ Controls.tool = function(cx) {
 };
 
 Controls.color = function(cx) {
-  var input = elt("input", {type: "color"});
+  var input = elt("input", {type: "color", id: "color"});
   input.addEventListener("change", function() {
     cx.fillStyle = input.value;
     cx.strokeStyle = input.value;

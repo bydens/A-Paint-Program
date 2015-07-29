@@ -22,7 +22,7 @@ Controls.tool = function(cx) {
 };
 
 Controls.color = function(cx) {
-  var input = elt("input", {type: "color"});
+  var input = elt("input", {type: "color", id: "color"});
   input.addEventListener("change", function() {
     cx.fillStyle = input.value;
     cx.strokeStyle = input.value;
@@ -87,13 +87,14 @@ Controls.openURL = function(cx) {
 };
 
 module.exports = Controls;
-},{"../functions/elt":4,"../functions/loadImageURL":7,"./Tools":2}],2:[function(require,module,exports){
+},{"../functions/elt":5,"../functions/loadImageURL":8,"./Tools":2}],2:[function(require,module,exports){
 //-------------------------------Tools--------------------------------------
 var relativePos = require('../functions/relativePos'),
     randomPointInRadius = require('../functions/randomPointInRadius'),
     rectangleFrom = require('../functions/rectangleFrom'),
     forAllNeighbors = require('../functions/forAllNeighbors'),
     isSameColor = require('../functions/isSameColor'),
+    colorAt = require('../functions/colorAt'),
     trackDrag = require('../functions/trackDrag');
 
 var Tools = Object.create(null);
@@ -193,8 +194,31 @@ Tools["Flood fill"] = function(event, cx) {
   }
 };
 
+Tools["Pick color"] = function(event, cx) {
+  var pos = relativePos(event, cx.canvas);
+  try {
+    var color = colorAt(cx, pos.x, pos.y);
+  } catch(e) {
+    if (e instanceof SecurityError) {
+      alert("Unable to access your picture's pixel data");
+      return;
+    } else {
+      throw e;
+    }
+  }
+
+  cx.fillStyle = color;
+  cx.strokeStyle = color;
+  document.getElementById("color").value = cx.fillStyle;
+};
+
 module.exports = Tools;
-},{"../functions/forAllNeighbors":5,"../functions/isSameColor":6,"../functions/randomPointInRadius":8,"../functions/rectangleFrom":9,"../functions/relativePos":10,"../functions/trackDrag":11}],3:[function(require,module,exports){
+},{"../functions/colorAt":3,"../functions/forAllNeighbors":6,"../functions/isSameColor":7,"../functions/randomPointInRadius":9,"../functions/rectangleFrom":10,"../functions/relativePos":11,"../functions/trackDrag":12}],3:[function(require,module,exports){
+module.exports = function(cx, x, y) {
+  var pixel = cx.getImageData(x, y, 1, 1).data;
+  return "rgb(" + pixel[0] + ", " + pixel[1] + ", " + pixel[2] + ")";
+};
+},{}],4:[function(require,module,exports){
 var elt = require('./elt');
 var Controls = require('../Objects/Controls');
 
@@ -208,7 +232,7 @@ module.exports = function (parent) {
   var panel = elt("div", {class: "picturepanel"}, canvas);
   parent.appendChild(elt("div", null, panel, toolbar));
 };
-},{"../Objects/Controls":1,"./elt":4}],4:[function(require,module,exports){
+},{"../Objects/Controls":1,"./elt":5}],5:[function(require,module,exports){
 module.exports = function(name, attributes) {
   var node = document.createElement(name);
   if (attributes) {
@@ -224,14 +248,14 @@ module.exports = function(name, attributes) {
   }
   return node;
 };
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function (point, fn) {
   fn({x: point.x, y: point.y + 1});
   fn({x: point.x, y: point.y - 1});
   fn({x: point.x + 1, y: point.y});
   fn({x: point.x - 1, y: point.y});
 };
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function (data, pos1, pos2) {
   var offset1 = (pos1.x + pos1.y * data.width) * 4;
   var offset2 = (pos2.x + pos2.y * data.width) * 4;
@@ -241,7 +265,7 @@ module.exports = function (data, pos1, pos2) {
   }
   return true;
 };
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function (cx, url) {
   var image = document.createElement("img");
   image.addEventListener("load", function() {
@@ -255,7 +279,7 @@ module.exports = function (cx, url) {
   });
   image.src = url;
 };
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function (radius) {
   for (;;) {
     var x = Math.random() * 2 - 1;
@@ -264,20 +288,20 @@ module.exports = function (radius) {
       return {x: x * radius, y: y * radius};
   }
 };
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function (a, b) {
   return {left: Math.min(a.x, b.x),
           top: Math.min(a.y, b.y),
           width: Math.abs(a.x - b.x),
           height: Math.abs(a.y - b.y)};
 };
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function (event, element) {
   var rect = element.getBoundingClientRect();
   return {x: Math.floor(event.clientX - rect.left),
           y: Math.floor(event.clientY - rect.top)};
 };
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function (onMove, onEnd) {
   function end(event) {
     removeEventListener("mousemove", onMove);
@@ -288,8 +312,8 @@ module.exports = function (onMove, onEnd) {
   addEventListener("mousemove", onMove);
   addEventListener("mouseup", end);
 };
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var createPaint = require('./functions/createPaint');
 
 createPaint(document.body);
-},{"./functions/createPaint":3}]},{},[12]);
+},{"./functions/createPaint":4}]},{},[13]);

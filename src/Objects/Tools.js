@@ -4,6 +4,7 @@ var relativePos = require('../functions/relativePos'),
     rectangleFrom = require('../functions/rectangleFrom'),
     forAllNeighbors = require('../functions/forAllNeighbors'),
     isSameColor = require('../functions/isSameColor'),
+    colorAt = require('../functions/colorAt'),
     trackDrag = require('../functions/trackDrag');
 
 var Tools = Object.create(null);
@@ -101,6 +102,24 @@ Tools["Flood fill"] = function(event, cx) {
         workList.push(neighbor);
     });
   }
+};
+
+Tools["Pick color"] = function(event, cx) {
+  var pos = relativePos(event, cx.canvas);
+  try {
+    var color = colorAt(cx, pos.x, pos.y);
+  } catch(e) {
+    if (e instanceof SecurityError) {
+      alert("Unable to access your picture's pixel data");
+      return;
+    } else {
+      throw e;
+    }
+  }
+
+  cx.fillStyle = color;
+  cx.strokeStyle = color;
+  document.getElementById("color").value = cx.fillStyle;
 };
 
 module.exports = Tools;
