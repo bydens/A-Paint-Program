@@ -150,7 +150,7 @@ var elt = require('./elt');
 var Controls = require('../Objects/Controls');
 
 module.exports = function (parent) {
-  var canvas = elt("canvas", {width: 500, height: 300});
+  var canvas = elt("canvas", {width: 700, height: 450});
   var cx = canvas.getContext("2d");
   var toolbar = elt("div", {class: "toolbar"});
   for (var name in Controls)
