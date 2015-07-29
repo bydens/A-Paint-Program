@@ -1,6 +1,7 @@
 //-------------------------------Tools--------------------------------------
 var relativePos = require('../functions/relativePos'),
     randomPointInRadius = require('../functions/randomPointInRadius'),
+    rectangleFrom = require('../functions/rectangleFrom'),
     trackDrag = require('../functions/trackDrag');
 
 var Tools = Object.create(null);
@@ -51,6 +52,28 @@ Tools.Spray = function(event, cx) {
     currentPos = relativePos(event, cx.canvas);
   }, function() {
     clearInterval(spray);
+  });
+};
+
+Tools.Rectangle = function(event, cx) {
+  var relativeStart = relativePos(event, cx.canvas);
+  var pageStart = {x: event.pageX, y: event.pageY};
+
+  var trackingNode = document.createElement("div");
+  trackingNode.style.position = "absolute";
+  trackingNode.style.background = cx.fillStyle;
+  document.body.appendChild(trackingNode);
+
+  trackDrag(function(event) {
+    var rect = rectangleFrom(pageStart, {x: event.pageX, y: event.pageY});
+    trackingNode.style.left = rect.left + "px";
+    trackingNode.style.top = rect.top + "px";
+    trackingNode.style.width = rect.width + "px";
+    trackingNode.style.height = rect.height + "px";
+  }, function(event) {
+    var rect = rectangleFrom(relativeStart, relativePos(event, cx.canvas));
+    cx.fillRect(rect.left, rec.top, rec.width, rec.height);
+    document.body.removeChild(trackingNode);
   });
 };
 
