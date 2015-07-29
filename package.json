@@ -1,0 +1,12 @@
+{
+  "name": "Paint",
+  "version": "0.0.1",
+  "author": "Denys Bykanov",
+  "description": "Prototype a paint online",
+  "devDependencies": {
+    "browserify": "latest"
+  },
+  "scripts": {
+    "build-js": "browserify src/main.js > js/build.js"
+  }
+}
