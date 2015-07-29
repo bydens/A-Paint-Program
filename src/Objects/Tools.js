@@ -2,6 +2,8 @@
 var relativePos = require('../functions/relativePos'),
     randomPointInRadius = require('../functions/randomPointInRadius'),
     rectangleFrom = require('../functions/rectangleFrom'),
+    forAllNeighbors = require('../functions/forAllNeighbors'),
+    isSameColor = require('../functions/isSameColor'),
     trackDrag = require('../functions/trackDrag');
 
 var Tools = Object.create(null);
@@ -75,6 +77,30 @@ Tools.Rectangle = function(event, cx) {
     cx.fillRect(rect.left, rec.top, rec.width, rec.height);
     document.body.removeChild(trackingNode);
   });
+};
+
+Tools["Flood fill"] = function(event, cx) {
+  var startPos = relativePos(event, cx.canvas);
+
+  var data = cx.getImageData(0, 0, cx.canvas.width, cx. canvas.height);
+  var alreadyFilled = new Array(data.width * data.height);
+  var workList = [startPos];
+  while (workList.length) {
+    var pos = workList.pop();
+    var offset = pos.x + data.width * pos.y;
+    if (alreadyFilled[offset]) 
+      continue;
+
+    cx.fillRect(pos.x, pos.y, 1, 1);
+    alreadyFilled[offset] = true;
+
+    forAllNeighbors(pos, function(neighbor) {
+      if (neighbor.x >= 0 && neighbor.x < data.width &&
+          neighbor.y >= 0 && neighbor.y <data.height &&
+          isSameColor(data, startPos, neighbor))
+        workList.push(neighbor);
+    });
+  }
 };
 
 module.exports = Tools;

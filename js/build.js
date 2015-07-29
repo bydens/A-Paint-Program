@@ -87,11 +87,13 @@ Controls.openURL = function(cx) {
 };
 
 module.exports = Controls;
-},{"../functions/elt":4,"../functions/loadImageURL":5,"./Tools":2}],2:[function(require,module,exports){
+},{"../functions/elt":4,"../functions/loadImageURL":7,"./Tools":2}],2:[function(require,module,exports){
 //-------------------------------Tools--------------------------------------
 var relativePos = require('../functions/relativePos'),
     randomPointInRadius = require('../functions/randomPointInRadius'),
     rectangleFrom = require('../functions/rectangleFrom'),
+    forAllNeighbors = require('../functions/forAllNeighbors'),
+    isSameColor = require('../functions/isSameColor'),
     trackDrag = require('../functions/trackDrag');
 
 var Tools = Object.create(null);
@@ -167,8 +169,32 @@ Tools.Rectangle = function(event, cx) {
   });
 };
 
+Tools["Flood fill"] = function(event, cx) {
+  var startPos = relativePos(event, cx.canvas);
+
+  var data = cx.getImageData(0, 0, cx.canvas.width, cx. canvas.height);
+  var alreadyFilled = new Array(data.width * data.height);
+  var workList = [startPos];
+  while (workList.length) {
+    var pos = workList.pop();
+    var offset = pos.x + data.width * pos.y;
+    if (alreadyFilled[offset]) 
+      continue;
+
+    cx.fillRect(pos.x, pos.y, 1, 1);
+    alreadyFilled[offset] = true;
+
+    forAllNeighbors(pos, function(neighbor) {
+      if (neighbor.x >= 0 && neighbor.x < data.width &&
+          neighbor.y >= 0 && neighbor.y <data.height &&
+          isSameColor(data, startPos, neighbor))
+        workList.push(neighbor);
+    });
+  }
+};
+
 module.exports = Tools;
-},{"../functions/randomPointInRadius":6,"../functions/rectangleFrom":7,"../functions/relativePos":8,"../functions/trackDrag":9}],3:[function(require,module,exports){
+},{"../functions/forAllNeighbors":5,"../functions/isSameColor":6,"../functions/randomPointInRadius":8,"../functions/rectangleFrom":9,"../functions/relativePos":10,"../functions/trackDrag":11}],3:[function(require,module,exports){
 var elt = require('./elt');
 var Controls = require('../Objects/Controls');
 
@@ -199,6 +225,23 @@ module.exports = function(name, attributes) {
   return node;
 };
 },{}],5:[function(require,module,exports){
+module.exports = function (point, fn) {
+  fn({x: point.x, y: point.y + 1});
+  fn({x: point.x, y: point.y - 1});
+  fn({x: point.x + 1, y: point.y});
+  fn({x: point.x - 1, y: point.y});
+};
+},{}],6:[function(require,module,exports){
+module.exports = function (data, pos1, pos2) {
+  var offset1 = (pos1.x + pos1.y * data.width) * 4;
+  var offset2 = (pos2.x + pos2.y * data.width) * 4;
+  for (var i = 0; i < 4; i++) {
+    if (data.data[offset1 + i] != data.data[offset2 + i])
+      return false;
+  }
+  return true;
+};
+},{}],7:[function(require,module,exports){
 module.exports = function (cx, url) {
   var image = document.createElement("img");
   image.addEventListener("load", function() {
@@ -212,7 +255,7 @@ module.exports = function (cx, url) {
   });
   image.src = url;
 };
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function (radius) {
   for (;;) {
     var x = Math.random() * 2 - 1;
@@ -221,20 +264,20 @@ module.exports = function (radius) {
       return {x: x * radius, y: y * radius};
   }
 };
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function (a, b) {
   return {left: Math.min(a.x, b.x),
           top: Math.min(a.y, b.y),
           width: Math.abs(a.x - b.x),
           height: Math.abs(a.y - b.y)};
 };
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function (event, element) {
   var rect = element.getBoundingClientRect();
   return {x: Math.floor(event.clientX - rect.left),
           y: Math.floor(event.clientY - rect.top)};
 };
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function (onMove, onEnd) {
   function end(event) {
     removeEventListener("mousemove", onMove);
@@ -245,8 +288,8 @@ module.exports = function (onMove, onEnd) {
   addEventListener("mousemove", onMove);
   addEventListener("mouseup", end);
 };
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var createPaint = require('./functions/createPaint');
 
 createPaint(document.body);
-},{"./functions/createPaint":3}]},{},[10]);
+},{"./functions/createPaint":3}]},{},[12]);
