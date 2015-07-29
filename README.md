@@ -1,5 +1,5 @@
 #A Paint Program
-![Project: A Paint Program](https://raw.githubusercontent.com/bydens/A-Paint-Paint/img/master/paint.png)
+![Project: A Paint Program](raw.githubusercontent.com/bydens/A-Paint-Program/master/img/paint.png)
 
 ##Overview
 
